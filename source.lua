@@ -275,6 +275,7 @@ Library.Create = function(_, LibraryOptions)
 	LibraryOptions.Name = LibraryOptions.Name or "UI Library"
 	LibraryOptions.Size = LibraryOptions.Size or UDim2.new(0, 555, 0, 400)
 	LibraryOptions.Developer = LibraryOptions.Developer or false
+	LibraryOptions.SkipLoadingAnimation = LibraryOptions.SkipLoadingAnimation or false
 
 	local Theme = Themes[LibraryOptions.Theme] or Themes["Dark"]
 
@@ -356,60 +357,23 @@ Library.Create = function(_, LibraryOptions)
 		TS:Create(Child:WaitForChild("NameLabel"), TI(0.2), {TextTransparency = 0}):Play()
 	end)
 
-	--open animation
-	TS:Create(MainFrame, TI(0.3), {Size = LibraryOptions.Size}):Play()
-	wait(0.3)
-	TS:Create(Tabs, TI(0.3), {Size = UDim2.new(0, 100, 1, 0)}):Play()
+	--open animation (skippable)
+	if LibraryOptions.SkipLoadingAnimation then
+		MainFrame.Size = LibraryOptions.Size
+		Tabs.Size = UDim2.new(0, 100, 1, 0)
+	else
+		TS:Create(MainFrame, TI(0.3), {Size = LibraryOptions.Size}):Play()
+		wait(0.3)
+		TS:Create(Tabs, TI(0.3), {Size = UDim2.new(0, 100, 1, 0)}):Play()
+	end
+
 	local UIToggleState = true
 
+	--toggle UI visibility with Delete key
 	UIS.InputEnded:connect(function(Input)
-		if Input.KeyCode == Enum.KeyCode.RightControl then
+		if Input.KeyCode == Enum.KeyCode.Delete then
 			UIToggleState = not UIToggleState
-			--[[if UIToggleState then
-				TS:Create(Tabs, TI(0.2), {Size = UDim2.new(1, 0, 1, 0)}):Play()
-				for i, v in next, Tabs:GetChildren() do
-					spawn(function()
-						if v.ClassName == "TextButton" then
-							TS:Create(v.NameLabel, TI(0.15), {TextTransparency = 1}):Play()
-						end
-					end)
-				end
-
-				for i, v in next, OptionsContainerClips:GetChildren() do
-					if v.ClassName == "ScrollingFrame" then
-						v.CanvasSize = UDim2.new(0, 0, 0, 0)
-					end
-				end
-
-				wait(0.5)
-				MainFrame.ClipsDescendants = true
-				TS:Create(MainFrame, TI(0.2), {Size = UDim2.new(0, 0, 0, 0)}):Play()
-			else
-				TS:Create(MainFrame, TI(0.2), {Size = LibraryOptions.Size}):Play()
-				MainFrame.ClipsDescendants = false
-				wait(0.5)
-				TS:Create(Tabs, TI(0.2), {Size = UDim2.new(0, 100, 1, 0)}):Play()
-				for i, v in next, OptionsContainerClips:GetChildren() do
-					if v.ClassName == "ScrollingFrame" then
-						v.CanvasSize = UDim2.new(1, 0, 1, 0)
-					end
-				end
-
-				for i, v in next, Tabs:GetChildren() do
-					spawn(function()
-						if v.ClassName == "TextButton" then
-							TS:Create(v.NameLabel, TI(0.15), {TextTransparency = 0}):Play()
-						end
-					end)
-				end				
-			end]]
-			local Old = MainFrame.Position
-			if UIToggleState then
-				MainFrame.Position = UDim2.new(0.5, 0 , 0.5, 0)
-			else
-				Old = MainFrame.Position
-				MainFrame.Position = UDim2.new(0.5, 0, 10000, 0)
-			end
+			Gui.Enabled = UIToggleState
 		end
 	end)
 
